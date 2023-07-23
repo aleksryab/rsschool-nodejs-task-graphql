@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
+import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './uuid.js';
 import { UserType } from './user.js';
-import { PrismaClient } from '@prisma/client';
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
