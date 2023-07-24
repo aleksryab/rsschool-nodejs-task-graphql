@@ -9,9 +9,9 @@ import {
 import { Static } from '@fastify/type-provider-typebox';
 import { createUserSchema, changeUserByIdSchema } from '../../users/schemas.js';
 import { UserType } from '../types/user.js';
-import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 import { UUIDType } from '../types/uuid.js';
 import { FieldConfig } from '../types/common.js';
+import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 
 // Create User
 type CreateUserData = Static<typeof createUserSchema.body>;
@@ -46,8 +46,12 @@ export const deleteUserField: FieldConfig = {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
   resolve: async (_, { id }: { id: string }, { db }) => {
-    const result = await db.user.delete({ where: { id } });
-    return !!result;
+    try {
+      await db.user.delete({ where: { id } });
+      return true;
+    } catch {
+      return false;
+    }
   },
 };
 
@@ -108,15 +112,18 @@ export const unsubscribeFromField: FieldConfig = {
     authorId: { type: new GraphQLNonNull(UUIDType) },
   },
   resolve: async (_, { userId, authorId }: SubscribeBody, { db }) => {
-    const result = await db.subscribersOnAuthors.delete({
-      where: {
-        subscriberId_authorId: {
-          subscriberId: userId,
-          authorId: authorId,
+    try {
+      await db.subscribersOnAuthors.delete({
+        where: {
+          subscriberId_authorId: {
+            subscriberId: userId,
+            authorId: authorId,
+          },
         },
-      },
-    });
-
-    return !!result;
+      });
+      return true;
+    } catch {
+      return false;
+    }
   },
 };

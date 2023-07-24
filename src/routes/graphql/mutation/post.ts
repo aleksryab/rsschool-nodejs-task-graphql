@@ -9,8 +9,8 @@ import { Static } from '@fastify/type-provider-typebox';
 import { changePostByIdSchema, createPostSchema } from '../../posts/schemas.js';
 import { PostType } from '../types/post.js';
 import { UUIDType } from '../types/uuid.js';
-import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 import { FieldConfig } from '../types/common.js';
+import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 
 // Create Post
 type CreatePostData = Static<typeof createPostSchema.body>;
@@ -44,8 +44,12 @@ export const deletePostField: FieldConfig = {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
   resolve: async (_, { id }: { id: string }, { db }) => {
-    const result = await db.post.delete({ where: { id } });
-    return !!result;
+    try {
+      await db.post.delete({ where: { id } });
+      return true;
+    } catch {
+      return false;
+    }
   },
 };
 

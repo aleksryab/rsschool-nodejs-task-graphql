@@ -8,10 +8,10 @@ import {
 import { Static } from '@fastify/type-provider-typebox';
 import { changeProfileByIdSchema, createProfileSchema } from '../../profiles/schemas.js';
 import { ProfileType } from '../types/profile.js';
-import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 import { UUIDType } from '../types/uuid.js';
 import { MemberTypeId } from '../types/member.js';
 import { FieldConfig } from '../types/common.js';
+import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 
 // Create Profile
 type CreateProfileData = Static<typeof createProfileSchema.body>;
@@ -46,8 +46,12 @@ export const deleteProfileField: FieldConfig = {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
   resolve: async (_, { id }: { id: string }, { db }) => {
-    const result = await db.profile.delete({ where: { id } });
-    return !!result;
+    try {
+      await db.profile.delete({ where: { id } });
+      return true;
+    } catch {
+      return false;
+    }
   },
 };
 

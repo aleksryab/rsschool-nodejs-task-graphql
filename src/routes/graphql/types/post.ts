@@ -1,9 +1,9 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
 import { Static } from '@fastify/type-provider-typebox';
+import { postSchema } from '../../posts/schemas.js';
 import { UUIDType } from './uuid.js';
 import { UserType } from './user.js';
 import { GQLContext } from './common.js';
-import { postSchema } from '../../posts/schemas.js';
 
 export type Post = Static<typeof postSchema>;
 

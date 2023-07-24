@@ -4,7 +4,6 @@ import {
   GraphQLString,
   GraphQLFloat,
   GraphQLList,
-  GraphQLFieldConfig,
 } from 'graphql';
 import { Static } from '@fastify/type-provider-typebox';
 import { userSchema } from '../../users/schemas.js';
@@ -13,11 +12,6 @@ import { MemberType } from './member.js';
 import { ProfileType } from './profile.js';
 import { PostType } from './post.js';
 import { GQLContext } from './common.js';
-
-type UserTypeRootFields = Record<
-  keyof Static<typeof userSchema>,
-  GraphQLFieldConfig<unknown, unknown>
->;
 
 export type User = Static<typeof userSchema>;
 export interface UserWithSubs extends User {
@@ -31,16 +25,12 @@ export interface UserWithSubs extends User {
   }[];
 }
 
-export const userTypeRootFields: UserTypeRootFields = {
-  id: { type: new GraphQLNonNull(UUIDType) },
-  name: { type: new GraphQLNonNull(GraphQLString) },
-  balance: { type: new GraphQLNonNull(GraphQLFloat) },
-};
-
 export const UserType: GraphQLObjectType = new GraphQLObjectType<User, GQLContext>({
   name: 'User',
   fields: () => ({
-    ...userTypeRootFields,
+    id: { type: new GraphQLNonNull(UUIDType) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
 
     profile: {
       type: ProfileType,

@@ -24,8 +24,9 @@ export const query = new GraphQLObjectType<unknown, GQLContext>({
     memberType: {
       type: MemberType,
       args: { id: { type: new GraphQLNonNull(MemberTypeId) } },
-      resolve: async (_, { id }: ArgsWhiId, { db }) =>
-        await db.memberType.findUnique({ where: { id } }),
+      resolve: async (_, { id }: ArgsWhiId, { db }) => {
+        return await db.memberType.findUnique({ where: { id } });
+      },
     },
 
     users: {
@@ -64,8 +65,9 @@ export const query = new GraphQLObjectType<unknown, GQLContext>({
     profile: {
       type: ProfileType,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: async (_, { id }: ArgsWhiId, { db }) =>
-        await db.profile.findUnique({ where: { id } }),
+      resolve: async (_, { id }: ArgsWhiId, { db }) => {
+        return await db.profile.findUnique({ where: { id } });
+      },
     },
 
     posts: {
@@ -76,8 +78,9 @@ export const query = new GraphQLObjectType<unknown, GQLContext>({
     post: {
       type: PostType,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: async (_, { id }: ArgsWhiId, { db }) =>
-        await db.post.findUnique({ where: { id } }),
+      resolve: async (_, { id }: ArgsWhiId, { db }) => {
+        return await db.post.findUnique({ where: { id } });
+      },
     },
   }),
 });

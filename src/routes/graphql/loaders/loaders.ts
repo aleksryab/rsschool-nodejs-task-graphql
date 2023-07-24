@@ -12,10 +12,10 @@ export const createDataLoaders = (prisma: PrismaClient) => {
         where: { userId: { in: ids as string[] } },
       });
 
-      const profilesMap = {} as Record<string, Profile>;
-      profiles.forEach((profile) => (profilesMap[profile.userId] = profile));
+      const profilesMap = new Map<string, Profile>();
+      profiles.forEach((profile) => profilesMap.set(profile.userId, profile));
 
-      return ids.map((id) => profilesMap[id]);
+      return ids.map((id) => profilesMap.get(id));
     }),
 
     posts: new DataLoader(async (ids: readonly string[]) => {
@@ -23,16 +23,17 @@ export const createDataLoaders = (prisma: PrismaClient) => {
         where: { authorId: { in: ids as string[] } },
       });
 
-      const postsMap = {} as Record<string, Post[]>;
+      const postsMap = new Map<string, Post[]>();
       posts.forEach((post) => {
-        if (postsMap[post.authorId]) {
-          postsMap[post.authorId].push(post);
+        const postsByAuthor = postsMap.get(post.authorId);
+        if (postsByAuthor) {
+          postsByAuthor.push(post);
         } else {
-          postsMap[post.authorId] = [post];
+          postsMap.set(post.authorId, [post]);
         }
       });
 
-      return ids.map((id) => postsMap[id]);
+      return ids.map((id) => postsMap.get(id));
     }),
 
     memberType: new DataLoader(async (ids: readonly string[]) => {
@@ -40,10 +41,10 @@ export const createDataLoaders = (prisma: PrismaClient) => {
         where: { id: { in: ids as string[] } },
       });
 
-      const membersMap = {} as Record<string, Member>;
-      members.forEach((member) => (membersMap[member.id] = member));
+      const membersMap = new Map<string, Member>();
+      members.forEach((member) => membersMap.set(member.id, member));
 
-      return ids.map((id) => membersMap[id]);
+      return ids.map((id) => membersMap.get(id));
     }),
 
     user: new DataLoader(async (ids: readonly string[]) => {
@@ -52,10 +53,10 @@ export const createDataLoaders = (prisma: PrismaClient) => {
         include: { userSubscribedTo: true, subscribedToUser: true },
       });
 
-      const usersMap = {} as Record<string, User>;
-      users.forEach((user) => (usersMap[user.id] = user));
+      const usersMap = new Map<string, User>();
+      users.forEach((user) => usersMap.set(user.id, user));
 
-      return ids.map((id) => usersMap[id]);
+      return ids.map((id) => usersMap.get(id));
     }),
   };
 };
