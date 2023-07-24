@@ -6,12 +6,12 @@ import {
   GraphQLInt,
 } from 'graphql';
 import { Static } from '@fastify/type-provider-typebox';
-import { PrismaClient } from '@prisma/client';
 import { changeProfileByIdSchema, createProfileSchema } from '../../profiles/schemas.js';
 import { ProfileType } from '../types/profile.js';
 import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 import { UUIDType } from '../types/uuid.js';
 import { MemberTypeId } from '../types/member.js';
+import { FieldConfig } from '../types/common.js';
 
 // Create Profile
 type CreateProfileData = Static<typeof createProfileSchema.body>;
@@ -29,24 +29,24 @@ export const CreateProfileInputType = new GraphQLInputObjectType({
   fields: createProfileInputFields,
 });
 
-export const createProfileField = {
+export const createProfileField: FieldConfig = {
   type: ProfileType,
   args: {
     dto: { type: new GraphQLNonNull(CreateProfileInputType) },
   },
-  resolve: async (_, body: CreateProfileBody, ctx: PrismaClient) => {
-    return await ctx.profile.create({ data: body.dto });
+  resolve: async (_, body: CreateProfileBody, { db }) => {
+    return await db.profile.create({ data: body.dto });
   },
 };
 
 // Delete Profile
-export const deleteProfileField = {
+export const deleteProfileField: FieldConfig = {
   type: GraphQLBoolean,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_, { id }: { id: string }, ctx: PrismaClient) => {
-    const result = await ctx.profile.delete({ where: { id } });
+  resolve: async (_, { id }: { id: string }, { db }) => {
+    const result = await db.profile.delete({ where: { id } });
     return !!result;
   },
 };
@@ -70,13 +70,13 @@ export const ChangeProfileInputType = new GraphQLInputObjectType({
   fields: ChangeProfileInputFields,
 });
 
-export const changeProfileField = {
+export const changeProfileField: FieldConfig = {
   type: ProfileType,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
     dto: { type: ChangeProfileInputType },
   },
-  resolve: async (_, body: ChangeProfileBody, ctx: PrismaClient) => {
-    return await ctx.profile.update({ where: { id: body.id }, data: body.dto });
+  resolve: async (_, body: ChangeProfileBody, { db }) => {
+    return await db.profile.update({ where: { id: body.id }, data: body.dto });
   },
 };

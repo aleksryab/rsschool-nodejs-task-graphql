@@ -7,11 +7,11 @@ import {
   GraphQLFloat,
 } from 'graphql';
 import { Static } from '@fastify/type-provider-typebox';
-import { PrismaClient } from '@prisma/client';
 import { createUserSchema, changeUserByIdSchema } from '../../users/schemas.js';
 import { UserType } from '../types/user.js';
 import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
 import { UUIDType } from '../types/uuid.js';
+import { FieldConfig } from '../types/common.js';
 
 // Create User
 type CreateUserData = Static<typeof createUserSchema.body>;
@@ -29,24 +29,24 @@ export const CreateUserInputType = new GraphQLInputObjectType({
   fields: createUserInputFields,
 });
 
-export const createUserField = {
+export const createUserField: FieldConfig = {
   type: UserType,
   args: {
     dto: { type: new GraphQLNonNull(CreateUserInputType) },
   },
-  resolve: async (_, body: CreateUserBody, ctx: PrismaClient) => {
-    return await ctx.user.create({ data: body.dto });
+  resolve: async (_, body: CreateUserBody, { db }) => {
+    return await db.user.create({ data: body.dto });
   },
 };
 
 // Delete User
-export const deleteUserField = {
+export const deleteUserField: FieldConfig = {
   type: GraphQLBoolean,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_, { id }: { id: string }, ctx: PrismaClient) => {
-    const result = await ctx.user.delete({ where: { id } });
+  resolve: async (_, { id }: { id: string }, { db }) => {
+    const result = await db.user.delete({ where: { id } });
     return !!result;
   },
 };
@@ -69,14 +69,14 @@ export const ChangeUserInputType = new GraphQLInputObjectType({
   fields: changeUserInputFields,
 });
 
-export const changeUserField = {
+export const changeUserField: FieldConfig = {
   type: UserType,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
     dto: { type: ChangeUserInputType },
   },
-  resolve: async (_, body: ChangeUserBody, ctx: PrismaClient) => {
-    return await ctx.user.update({ where: { id: body.id }, data: body.dto });
+  resolve: async (_, body: ChangeUserBody, { db }) => {
+    return await db.user.update({ where: { id: body.id }, data: body.dto });
   },
 };
 
@@ -86,14 +86,14 @@ type SubscribeBody = {
   authorId: string;
 };
 
-export const subscribeToField = {
+export const subscribeToField: FieldConfig = {
   type: UserType,
   args: {
     userId: { type: new GraphQLNonNull(UUIDType) },
     authorId: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_, { userId, authorId }: SubscribeBody, ctx: PrismaClient) => {
-    return await ctx.user.update({
+  resolve: async (_, { userId, authorId }: SubscribeBody, { db }) => {
+    return await db.user.update({
       where: { id: userId },
       data: { userSubscribedTo: { create: { authorId } } },
     });
@@ -101,14 +101,14 @@ export const subscribeToField = {
 };
 
 // User unsubscribeFrom
-export const unsubscribeFromField = {
+export const unsubscribeFromField: FieldConfig = {
   type: GraphQLBoolean,
   args: {
     userId: { type: new GraphQLNonNull(UUIDType) },
     authorId: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_, { userId, authorId }: SubscribeBody, ctx: PrismaClient) => {
-    const result = await ctx.subscribersOnAuthors.delete({
+  resolve: async (_, { userId, authorId }: SubscribeBody, { db }) => {
+    const result = await db.subscribersOnAuthors.delete({
       where: {
         subscriberId_authorId: {
           subscriberId: userId,

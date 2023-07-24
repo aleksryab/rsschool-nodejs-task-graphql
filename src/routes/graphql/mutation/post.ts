@@ -6,11 +6,11 @@ import {
   GraphQLString,
 } from 'graphql';
 import { Static } from '@fastify/type-provider-typebox';
-import { PrismaClient } from '@prisma/client';
 import { changePostByIdSchema, createPostSchema } from '../../posts/schemas.js';
 import { PostType } from '../types/post.js';
 import { UUIDType } from '../types/uuid.js';
 import { getFieldsFromTypeBySchema } from './helpers/getFieldsFromTypeBySchema.js';
+import { FieldConfig } from '../types/common.js';
 
 // Create Post
 type CreatePostData = Static<typeof createPostSchema.body>;
@@ -27,24 +27,24 @@ export const CreatePostInputType = new GraphQLInputObjectType({
   fields: createPostInputFields,
 });
 
-export const createPostField = {
+export const createPostField: FieldConfig = {
   type: PostType,
   args: {
     dto: { type: new GraphQLNonNull(CreatePostInputType) },
   },
-  resolve: async (_, body: CreatePostBody, ctx: PrismaClient) => {
-    return await ctx.post.create({ data: body.dto });
+  resolve: async (_, body: CreatePostBody, { db }) => {
+    return await db.post.create({ data: body.dto });
   },
 };
 
 // Delete Post
-export const deletePostField = {
+export const deletePostField: FieldConfig = {
   type: GraphQLBoolean,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
   },
-  resolve: async (_, { id }: { id: string }, ctx: PrismaClient) => {
-    const result = await ctx.post.delete({ where: { id } });
+  resolve: async (_, { id }: { id: string }, { db }) => {
+    const result = await db.post.delete({ where: { id } });
     return !!result;
   },
 };
@@ -67,13 +67,13 @@ export const ChangePostInputType = new GraphQLInputObjectType({
   fields: ChangePostInputFields,
 });
 
-export const changePostField = {
+export const changePostField: FieldConfig = {
   type: PostType,
   args: {
     id: { type: new GraphQLNonNull(UUIDType) },
     dto: { type: ChangePostInputType },
   },
-  resolve: async (_, body: ChangePostBody, ctx: PrismaClient) => {
-    return await ctx.post.update({ where: { id: body.id }, data: body.dto });
+  resolve: async (_, body: ChangePostBody, { db }) => {
+    return await db.post.update({ where: { id: body.id }, data: body.dto });
   },
 };

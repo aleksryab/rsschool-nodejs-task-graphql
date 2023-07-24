@@ -1,8 +1,11 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLInt } from 'graphql';
-import { PrismaClient } from '@prisma/client';
+import { Static } from '@fastify/type-provider-typebox';
+import { profileSchema } from '../../profiles/schemas.js';
 import { UUIDType } from './uuid.js';
 import { MemberType, MemberTypeId } from './member.js';
-import { UserType } from './user.js';
+import { GQLContext } from './common.js';
+
+export type Profile = Static<typeof profileSchema>;
 
 export const ProfileType: GraphQLObjectType = new GraphQLObjectType({
   name: 'Profile',
@@ -15,10 +18,9 @@ export const ProfileType: GraphQLObjectType = new GraphQLObjectType({
 
     memberType: {
       type: MemberType,
-      resolve: async (parent: { memberTypeId: string }, _, ctx: PrismaClient) =>
-        ctx.memberType.findUnique({ where: { id: parent.memberTypeId } }),
+      resolve: async (root: Profile, _, { loaders }: GQLContext) => {
+        return await loaders.memberType.load(root.memberTypeId);
+      },
     },
-
-    user: { type: UserType },
   }),
 });

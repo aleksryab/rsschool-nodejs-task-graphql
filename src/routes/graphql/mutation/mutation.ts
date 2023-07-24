@@ -8,20 +8,21 @@ import {
 } from './user.js';
 import { changeProfileField, createProfileField, deleteProfileField } from './profile.js';
 import { changePostField, createPostField, deletePostField } from './post.js';
+import { GQLContext } from '../types/common.js';
 
-export const mutation = new GraphQLObjectType({
+export const mutation = new GraphQLObjectType<unknown, GQLContext>({
   name: 'Mutation',
   fields: () => ({
     createUser: createUserField,
-    createProfile: createProfileField,
-    createPost: createPostField,
-    deleteUser: deleteUserField,
-    deleteProfile: deleteProfileField,
-    deletePost: deletePostField,
     changeUser: changeUserField,
-    changeProfile: changeProfileField,
-    changePost: changePostField,
+    deleteUser: deleteUserField,
     subscribeTo: subscribeToField,
     unsubscribeFrom: unsubscribeFromField,
+    createProfile: createProfileField,
+    changeProfile: changeProfileField,
+    deleteProfile: deleteProfileField,
+    createPost: createPostField,
+    changePost: changePostField,
+    deletePost: deletePostField,
   }),
 });

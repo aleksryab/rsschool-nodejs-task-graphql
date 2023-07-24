@@ -1,7 +1,11 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
-import { PrismaClient } from '@prisma/client';
+import { Static } from '@fastify/type-provider-typebox';
 import { UUIDType } from './uuid.js';
 import { UserType } from './user.js';
+import { GQLContext } from './common.js';
+import { postSchema } from '../../posts/schemas.js';
+
+export type Post = Static<typeof postSchema>;
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
@@ -13,8 +17,9 @@ export const PostType = new GraphQLObjectType({
 
     author: {
       type: UserType,
-      resolve: ({ authorId }: { authorId: string }, _, ctx: PrismaClient) =>
-        ctx.user.findUnique({ where: { id: authorId } }),
+      resolve: async ({ authorId }: Post, _, { db }: GQLContext) => {
+        return await db.user.findUnique({ where: { id: authorId } });
+      },
     },
   }),
 });
